@@ -16,6 +16,16 @@ public class DeliveryAttempt {
     @Id
     private UUID id;
 
+    // Deliberately left at JPA's default FetchType.EAGER, not LAZY.
+    // DeliveryWorker reads these two associations from a detached entity on
+    // a background scheduling thread — no HTTP request, no Open-Session-In-
+    // View, no active session by the time a provider calls
+    // attempt.getRecipient() or attempt.getNotification(). A LAZY proxy
+    // would throw LazyInitializationException there. EAGER trades a small
+    // per-row query cost (acceptable at this scale) for correctness in that
+    // background-processing path; at a scale where that cost matters, the
+    // fix would be an explicit JOIN FETCH query for the worker's specific
+    // access pattern, not a blanket EAGER default.
     @ManyToOne(optional = false)
     private Notification notification;
 

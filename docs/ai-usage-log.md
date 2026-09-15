@@ -56,6 +56,33 @@ ownership rather than autonomous trust:
    `claim()` directly, with a comment recording why — a reusable lesson
    for `@Modifying` queries generally, not just this one.
 
+A final self-review pass the morning of submission — reading through every
+file once more end to end, specifically hunting for bugs rather than just
+confirming things ran — turned up two more, both in the original greenfield
+scaffolding from Session A:
+
+3. **`updatedAt` in the status response never actually updated.**
+   `Notification` had no real `updatedAt` field, so
+   `NotificationStatusServiceImpl` was returning `createdAt` for both
+   `createdAt` and `updatedAt`. Visible directly in
+   `docs/assessment-testing-screenshots.pdf`: the `ROUTED` and `DELIVERED`
+   status checks for the same notification show an identical `updatedAt`,
+   even though the notification's state had clearly changed in between.
+   Fixed by adding a Hibernate-managed `@UpdateTimestamp` field.
+4. **A nonexistent notification ID returned 500, not 404.**
+   `NotificationStatusServiceImpl.getStatus()` throws a plain
+   `NoSuchElementException` on a lookup miss, and nothing translated that
+   into an HTTP status — so Spring Boot's default fallback surfaced it as
+   500 Internal Server Error. Fixed with a small `@RestControllerAdvice`
+   (`GlobalExceptionHandler`) mapping it to 404.
+
+That same pass also surfaced two things that look like bugs but are
+deliberate, and are documented rather than changed — see
+`docs/testing-and-limitations.md`: `NotificationStatusServiceImpl`'s
+reliance on Spring Boot's Open-Session-In-View default, and why
+`DeliveryAttempt.notification`/`.recipient` are intentionally left
+`FetchType.EAGER` instead of `LAZY`.
+
 ## What I did not delegate
 
 I did not ask AI to decide the routing precedence, the retry/backoff

@@ -13,6 +13,15 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Reads notification.getDeliveryAttempts() (a lazy @OneToMany) directly —
+ * safe here only because this runs inside an HTTP request, where Spring
+ * Boot's Open-Session-In-View default keeps a Hibernate session open for
+ * the request's full duration. DeliveryWorker deliberately does NOT rely
+ * on this same trick (see its own comment): it runs on a background
+ * scheduling thread with no request-bound session, so it queries delivery
+ * attempts explicitly through the repository instead.
+ */
 @Service
 public class NotificationStatusServiceImpl implements NotificationStatusService {
 
@@ -42,7 +51,7 @@ public class NotificationStatusServiceImpl implements NotificationStatusService 
                 selectedChannels,
                 deliveries,
                 notification.getCreatedAt(),
-                notification.getCreatedAt() // TODO: a real updatedAt once attempts start mutating status
+                notification.getUpdatedAt()
         );
     }
 

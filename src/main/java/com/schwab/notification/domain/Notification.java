@@ -1,6 +1,7 @@
 package com.schwab.notification.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +49,14 @@ public class Notification {
     private Instant scheduledAt;   // optional, requirement 4.1
     private Instant expiresAt;     // optional, requirement 4.1
 
+    // Hibernate-managed, not part of the constructor: stamped on every INSERT
+    // and UPDATE. Added after a review pass caught that the status endpoint
+    // was returning createdAt for both createdAt and updatedAt — there was
+    // no real updatedAt to return, so it silently never changed even after
+    // DeliveryWorker moved a notification through PROCESSING -> DELIVERED.
+    @UpdateTimestamp
+    private Instant updatedAt;
+
     protected Notification() {
         // JPA
     }
@@ -84,4 +93,5 @@ public class Notification {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getScheduledAt() { return scheduledAt; }
     public Instant getExpiresAt() { return expiresAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
 }
