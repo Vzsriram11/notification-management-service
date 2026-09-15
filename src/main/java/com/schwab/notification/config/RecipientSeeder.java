@@ -1,6 +1,7 @@
 package com.schwab.notification.config;
 
 import com.schwab.notification.domain.Channel;
+import com.schwab.notification.domain.DevicePlatform;
 import com.schwab.notification.domain.Recipient;
 import com.schwab.notification.repository.RecipientRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -24,13 +25,14 @@ public class RecipientSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        seed("user-1", List.of(Channel.EMAIL));             // narrow, explicit preference
-        seed("user-2", List.of(Channel.SMS, Channel.PUSH));  // broader, explicit preference
-        seed("user-3", List.of());                            // no stated preference at all
+        seed("user-1", List.of(Channel.EMAIL), DevicePlatform.IOS);                  // narrow, explicit preference; iOS device on file
+        seed("user-2", List.of(Channel.SMS, Channel.PUSH), DevicePlatform.ANDROID);  // broader, explicit preference; Android device on file
+        seed("user-3", List.of(), null);                                             // no stated preference, no device on file
     }
 
-    private void seed(String externalRef, List<Channel> preferences) {
+    private void seed(String externalRef, List<Channel> preferences, DevicePlatform platform) {
         recipientRepository.findByExternalRef(externalRef)
-                .orElseGet(() -> recipientRepository.save(new Recipient(UUID.randomUUID(), externalRef, preferences)));
+                .orElseGet(() -> recipientRepository.save(
+                        new Recipient(UUID.randomUUID(), externalRef, preferences, platform)));
     }
 }

@@ -23,17 +23,22 @@ public class Recipient {
     @Enumerated(EnumType.STRING)
     private List<Channel> preferredChannels; // ordered by preference; empty = no stated preference
 
+    @Enumerated(EnumType.STRING)
+    private DevicePlatform devicePlatform; // null = no device on file; PushChannelProvider needs this to pick APNs vs FCM
+
     protected Recipient() {
         // JPA
     }
 
-    public Recipient(UUID id, String externalRef, List<Channel> preferredChannels) {
+    public Recipient(UUID id, String externalRef, List<Channel> preferredChannels, DevicePlatform devicePlatform) {
         this.id = id;
         this.externalRef = externalRef;
         this.preferredChannels = preferredChannels;
+        this.devicePlatform = devicePlatform;
     }
 
     public UUID getId() { return id; }
     public String getExternalRef() { return externalRef; }
     public List<Channel> getPreferredChannels() { return preferredChannels; }
+    public DevicePlatform getDevicePlatform() { return devicePlatform; }
 }

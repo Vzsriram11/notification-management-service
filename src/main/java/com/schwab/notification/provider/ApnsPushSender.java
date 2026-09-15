@@ -1,26 +1,26 @@
 package com.schwab.notification.provider;
 
 import com.schwab.notification.config.ProviderSimulationProperties;
-import com.schwab.notification.domain.Channel;
 import com.schwab.notification.domain.DeliveryAttempt;
+import com.schwab.notification.domain.DevicePlatform;
 import com.schwab.notification.retry.DeliveryFailureType;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-/** Simulated provider — see EmailChannelProvider for the pattern. */
+/** Simulated APNs sender — see EmailChannelProvider for the pattern. */
 @Component
-public class SmsChannelProvider implements NotificationChannelProvider {
+public class ApnsPushSender implements PlatformPushSender {
 
     private final ProviderSimulationProperties simulation;
 
-    public SmsChannelProvider(ProviderSimulationProperties simulation) {
+    public ApnsPushSender(ProviderSimulationProperties simulation) {
         this.simulation = simulation;
     }
 
     @Override
-    public Channel supportedChannel() {
-        return Channel.SMS;
+    public DevicePlatform supportedPlatform() {
+        return DevicePlatform.IOS;
     }
 
     @Override
@@ -30,11 +30,11 @@ public class SmsChannelProvider implements NotificationChannelProvider {
 
         if (roll < simulation.getTimeoutRate()) {
             return DeliveryOutcome.failure(DeliveryFailureType.TIMEOUT,
-                    "simulated timeout sending SMS to " + recipientRef);
+                    "simulated APNs timeout for " + recipientRef);
         }
         if (roll < simulation.getTimeoutRate() + simulation.getFailureRate()) {
             return DeliveryOutcome.failure(DeliveryFailureType.TRANSIENT_PROVIDER_FAILURE,
-                    "simulated provider failure sending SMS to " + recipientRef);
+                    "simulated APNs failure for " + recipientRef);
         }
         return DeliveryOutcome.ok();
     }

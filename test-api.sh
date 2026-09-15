@@ -2,13 +2,13 @@
 RESPONSE=$(curl -s -X POST http://localhost:8080/notifications \
   -H "Content-Type: application/json" \
   -d '{
-    "idempotencyKey": "test-001",
+    "idempotencyKey": "test-018",
     "sourceSystem": "test-system",
-    "eventId": "evt-001",
+    "eventId": "evt-018",
     "notificationType": "ALERT",
     "severity": "HIGH",
     "priority": "NORMAL",
-    "recipientRefs": ["user-1"],
+    "recipientRefs": ["user-2"],
     "requestedChannels": ["EMAIL", "SMS"]
   }')
 echo "POST response: $RESPONSE"

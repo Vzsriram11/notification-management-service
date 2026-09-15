@@ -71,7 +71,9 @@ public class NotificationSubmissionServiceImpl implements NotificationSubmission
         for (String recipientRef : request.recipientRefs()) {
             Recipient recipient = recipientRepository.findByExternalRef(recipientRef)
                     .orElseGet(() -> recipientRepository.save(
-                            new Recipient(UUID.randomUUID(), recipientRef, List.of())));
+                            // No device platform on file for an auto-created recipient — PushChannelProvider
+                            // treats that as INVALID_RECIPIENT rather than guessing a platform.
+                            new Recipient(UUID.randomUUID(), recipientRef, List.of(), null)));
 
             List<Channel> channels = routingService.resolveChannels(notification, recipient);
             for (Channel channel : channels) {
